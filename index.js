@@ -14,7 +14,7 @@ class Block {
     }
 
     getHash() {
-        return sha256(this.prevHash + this.timestamp + JSON.stringify(this.data));
+        return sha256(this.prevHash + this.timestamp + JSON.stringify(this.data) + this.nonce);
     }
 
     mine(difficulty) {
@@ -33,7 +33,7 @@ class Blockchain {
     constructor() {
         // create genesis block
         this.chain = [new Block(Date.now().toString())];
-        this.difficulty = 1;
+        this.difficulty = 4;
     }
 
     getLastBlock() {
@@ -52,12 +52,11 @@ class Blockchain {
             const currentBlock = blockchain.chain[i];
             const previousBlock = blockchain.chain[i - 1];
 
-            // hash is equal of what hashing method returns
-            const hashOfCurrentBlockIsValid = currentBlock.hash !== currentBlock.getHash();
-            // history is not broken
-            const prevHashIsCorrect = currentBlock.prevHash !== previousBlock.hash;
+            if (currentBlock.hash !== currentBlock.getHash()) {
+                return false;
+            }
 
-            if (!hashOfCurrentBlockIsValid || prevHashIsCorrect) {
+            if (currentBlock.prevHash !== previousBlock.hash) {
                 return false;
             }
 
@@ -66,7 +65,15 @@ class Blockchain {
     }
 }
 
-module.exports = {
-    Block,
-    Blockchain
-};
+const myFirstBlockchain = new Blockchain();
+myFirstBlockchain.addBlock(new Block(Date.now().toString(), { from: 'Alice', to: 'Bob', amount: 50 }));
+myFirstBlockchain.addBlock(new Block(Date.now().toString(), { from: 'Bob', to: 'Alice', amount: 10 }));
+
+console.log(myFirstBlockchain.chain);
+
+console.log('isValid: ', myFirstBlockchain.isValid());
+
+// module.exports = {
+//     Block,
+//     Blockchain
+// };
